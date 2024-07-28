@@ -24,7 +24,7 @@
 ---
 ## Этапы выполнения:
 
-<details><summary>Создание облачной инфраструктуры</summary>
+<details><summary>Создание облачной инфраструктуры</summary>  
 
 Обновим Terraform до последней версии
 
@@ -34,14 +34,14 @@ Terraform v1.9.3
 on linux_amd64
 ```
 
-С помощью terraform создадим сервисный аккаунт и bucket для backend'a Terraform (хранение tfstate файлов)  
+С помощью terraform создадим сервисный аккаунт и bucket для backend Terraform (хранение tfstate файлов)  
 
-bucket.tf link  
+[bucket.tf](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/bucket/bucket.tf)  
 
-Далее создадим VPC так, чтобы подсети были разнесены по разным зонам 
-networks.tf link  
+Далее создадим VPC так, чтобы подсети были разнесены по разным зонам   
+[networks.tf](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/terraform/networks.tf)  
 
-В результате работы terraform мы получаем master ноду и 3 worker
+В результате работы terraform мы получаем master ноду и 3 worker  
 ```
 terraform apply
 Apply complete! Resources: 16 added, 0 changed, 0 destroyed.
@@ -56,7 +56,7 @@ external_ip_nodes = tolist([
 ])
 ```
 
-В kubespray/inventory/my-k8s-cluster мы получаем файл hosts.yml, который пригодится нам в дальнейшем дял установки кластера через kubespray
+В kubespray/inventory/my-k8s-cluster мы получаем файл hosts.yml, который пригодится нам в дальнейшем дял установки кластера через kubespray  
 ```
 ---
 all:
@@ -96,20 +96,21 @@ all:
 ```
 </details>
   
-<details><summary>Создание Kubernetes кластера</summary>
+<details><summary>Создание Kubernetes кластера</summary>  
 
-Теперь создадим k8s кластер, для этого воспользуемся kubespray
+Теперь создадим k8s кластер, для этого воспользуемся kubespray  
 ```
 git clone https://github.com/kubernetes-sigs/kubespray // клонируем репозиторий
 
 sudo pip3 install -r requirements.txt // устанавливаем зависимости
 ```
-На основе inventory hosts, сгенерированного с помощью terraform на предыдущем этапе, запустим ansible playbook
+На основе inventory hosts, сгенерированного с помощью terraform на предыдущем этапе, запустим ansible playbook  
 ```
 ansible-playbook -i inventory/my-k8s-cluster/hosts.yml --become --become-user=root cluster.yml
 ```
-Подождем пока он закончит установку и после окончания скопируем с master ноды файл /etc/kubernetes/admin.conf на нашу локальную машину.
-ВАЖНО - в файле необходимо заменить server ip на внешний ip адрес нашей master ноды
+Подождем пока он закончит установку и после окончания скопируем с master ноды файл /etc/kubernetes/admin.conf на нашу локальную машину.  
+
+ВАЖНО - в файле необходимо заменить server ip на внешний ip адрес нашей master ноды  
 ```
 apiVersion: v1
 clusters:
@@ -131,7 +132,7 @@ users:
     client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURLVENDQWhHZ0F3SUJBZ0lJY3k4ZjZwSjlldk13R
     client-key-data: 0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBelBlWVcwa3VocEVYdzlDSXAxd1V
 ```
-Далее проверим наш кластер
+Далее проверим наш кластер  
 ```
 kubectl get nodes
 NAME            STATUS   ROLES           AGE     VERSION
@@ -182,18 +183,20 @@ kube-system   nodelocaldns-m6ff2                                       1/1     R
 
   
 <details><summary>Создание тестового приложения</summary>
+ 
 На основе nginx, создадим docker image, который будет имитировать работу нашего приложения  
-Выберем DockerHub как регистри
 
-Repository link
+Выберем DockerHub как регистри  
 
-Dockerfile link
+[repository app](https://github.com/networksuperman/app.git)  
 
-nginx conf link
+[Dockerfile](https://github.com/networksuperman/app/blob/main/Dockerfile)  
 
-![]()  image of docker registry
+[nginx conf](https://github.com/networksuperman/app/blob/main/nginx/app.conf)  
 
-Для того чтобы развернуть наше приложение в k8s кластере, подготовим deployment и service файлы
+![](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/docker-registry-1.png)  
+
+Для того чтобы развернуть наше приложение в k8s кластере, подготовим deployment и service файлы  
 ```
 ---
 apiVersion: apps/v1
@@ -234,7 +237,7 @@ spec:
       port: 80
       targetPort: 80
 ```
-Для нашего приложения, в terraform, опишем network balancer
+Для нашего приложения, в terraform, опишем network balancer  
 ```
 resource "yandex_lb_network_load_balancer" "nlb-my-k8s-app" {
 
@@ -252,9 +255,9 @@ resource "yandex_lb_network_load_balancer" "nlb-my-k8s-app" {
 </details>
 
   
-<details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>
+<details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>  
 
-Развернем мониторинг с помощью Helm
+Развернем мониторинг с помощью Helm  
 ```
 helm version
 version.BuildInfo{Version:"v3.15.3", GitCommit:"3bb50bbbdd9c946ba9989fbe4fb4104766302a64", GitTreeState:"clean", GoVersion:"go1.22.5"}
@@ -270,7 +273,7 @@ helm list
 NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
 prometheus-stack        default         1               2024-07-28 06:50:17.37653586 +0000 UTC  deployed        kube-prometheus-stack-61.4.0    v0.75.2  
 ```
-Для Grafana создадим NodePort service
+Для Grafana создадим NodePort service  
 ```
 ---
 apiVersion: v1
@@ -287,7 +290,7 @@ spec:
       port: 3000
       targetPort: 3000
 ```
-С помощью terraform опишем network balancer для нашего приложения и Grafana, с целью получения доступа извне
+С помощью terraform опишем network balancer для нашего приложения и Grafana, с целью получения доступа извне  
 ```
 resource "yandex_lb_target_group" "nlb-group-grafana" {
 
@@ -355,7 +358,7 @@ resource "yandex_lb_network_load_balancer" "nlb-appl" {
   depends_on = [yandex_lb_target_group.nlb-group-grafana]
 }
 ```
-Проверим
+Проверим  
 ```
 kubectl get svc -w
 NAME                                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
@@ -372,33 +375,32 @@ prometheus-stack-kube-state-metrics         ClusterIP   10.233.42.87    <none>  
 prometheus-stack-prometheus-node-exporter   ClusterIP   10.233.47.126   <none>        9100/TCP                     6h53m
 ```
 Проверим в браузере
-![]() grafama image
+![grafana web](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/grafana-web-1.png)
 
-[app - наш load balancer](http://51.250.34.133/) 
+[app - наш load balancer](http://51.250.34.133/)   
 
 [grafana](http://51.250.40.131:3000)  
 
-![app image]()  
+![app image](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/app-image-1.png)    
 
-![yandex cloud resources]()
+![yandex cloud resources](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/yc-rs-1.png)  
 
 </details>
 
   
-<details><summary>Установка и настройка CI/CD</summary>
+<details><summary>Установка и настройка CI/CD</summary>  
 
-Для CI/CD воспользуемся GitHub Actions
+Для CI/CD воспользуемся GitHub Actions  
 
-[repository link]()
+[repository app](https://github.com/networksuperman/app.git)  
 
-[CICD манифест]()
+[CICD манифест](https://github.com/networksuperman/app/blob/main/.github/workflows/cicd.yml)  
 
-В настройках репозитория нашего приложения зададим необходимые secrets и variables
+В настройках репозитория нашего приложения зададим необходимые secrets и variables  
 
-![secrets image]()
+![secrets image](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/cicd-1.png)  
 
 Наш манифест (расположен в /.github/workflows) - link cicd.yml
-
 ```
 name: CICD
 
@@ -472,9 +474,9 @@ jobs:
           sudo kubectl apply -f kuber/service.yaml
           sudo kubectl get po,svc | grep diploma
 ```
-Во время сборки docker image, build осуществляется на основе ранее созданного [Dockerfile](), а deploy организован с помощью ранее упомянутых [deployment.yml]() и [service.yml]() - в нашем k8s создаются объекты, на основе данных манифестов
+Во время сборки docker image, build осуществляется на основе ранее созданного [Dockerfile](https://github.com/networksuperman/app/blob/main/Dockerfile), а deploy организован с помощью ранее упомянутых [deployment.yml](https://github.com/networksuperman/app/blob/main/kuber/deployment.yaml) и [service.yml](https://github.com/networksuperman/app/blob/main/kuber/service.yaml) - в нашем k8s создаются объекты, на основе данных манифестов  
 
-Сделаем небольшое изменение в нашем приложении (изменим версию с 0.0.8 на 0.0.9) и проверим
+Сделаем небольшое изменение в нашем приложении (изменим версию с 0.0.8 на 0.0.9) и проверим  
 ```
 git add .
 ubuntu@vm:~/app$ git commit -m "final commit"
@@ -494,11 +496,11 @@ Branch 'main' set up to track remote branch 'main' from 'origin'.
 ```
 Проверим в браузере
 
-![app-final]()
+![app-final](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/app-final.png)  
 
 Проверим GitHub Actions
 
-![cicd-final]()
+![cicd-final](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/cicd-final.png)  
 
 Как видим, все прошло успешно
 
