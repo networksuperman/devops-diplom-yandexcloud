@@ -250,12 +250,140 @@ resource "yandex_lb_network_load_balancer" "nlb-my-k8s-app" {
   }
 ```
 </details>
+
   
 <details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>
 
+Развернем мониторинг с помощью Helm
+```
+helm version
+version.BuildInfo{Version:"v3.15.3", GitCommit:"3bb50bbbdd9c946ba9989fbe4fb4104766302a64", GitTreeState:"clean", GoVersion:"go1.22.5"}
+```
+Для этого воспользуемся данным [чартом](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)  
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus-stack  prometheus-community/kube-prometheus-stack
+```
+```
+helm list
+NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
+prometheus-stack        default         1               2024-07-28 06:50:17.37653586 +0000 UTC  deployed        kube-prometheus-stack-61.4.0    v0.75.2  
+```
+Для Grafana создадим NodePort service
+```
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: grafana
+  ports:
+    - name: http
+      nodePort: 30902
+      port: 3000
+      targetPort: 3000
+```
+С помощью terraform опишем network balancer для нашего приложения и Grafana, с целью получения доступа извне
+```
+resource "yandex_lb_target_group" "nlb-group-grafana" {
 
+  name       = "nlb-group-grafana"
+  depends_on = [yandex_compute_instance_group.k8s-node-group]
+
+  dynamic "target" {
+    for_each = yandex_compute_instance_group.k8s-node-group.instances
+    content {
+      subnet_id = target.value.network_interface.0.subnet_id
+      address   = target.value.network_interface.0.ip_address
+    }
+  }
+}
+
+resource "yandex_lb_network_load_balancer" "nlb-graf" {
+
+  name = "nlb-grafana"
+
+  listener {
+    name        = "grafana-listener"
+    port        = 3000
+    target_port = 30902
+    external_address_spec {
+      ip_version = "ipv4"
+    }
+  }
+
+  attached_target_group {
+    target_group_id = yandex_lb_target_group.nlb-group-grafana.id
+
+    healthcheck {
+      name = "healthcheck"
+      tcp_options {
+        port = 30902
+      }
+    }
+  }
+  depends_on = [yandex_lb_target_group.nlb-group-grafana]
+}
+
+resource "yandex_lb_network_load_balancer" "nlb-appl" {
+
+  name = "nlb-my-k8s-app"
+
+  listener {
+    name        = "app-listener"
+    port        = 80
+    target_port = 30903
+    external_address_spec {
+      ip_version = "ipv4"
+    }
+  }
+
+  attached_target_group {
+    target_group_id = yandex_lb_target_group.nlb-group-grafana.id
+
+    healthcheck {
+      name = "healthcheck"
+      tcp_options {
+        port = 30903
+      }
+    }
+  }
+  depends_on = [yandex_lb_target_group.nlb-group-grafana]
+}
+```
+Проверим
+```
+kubectl get svc -w
+NAME                                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+alertmanager-operated                       ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP   6h53m
+diploma-svc                                 NodePort    10.233.5.22     <none>        80:30903/TCP                 146m
+grafana                                     NodePort    10.233.7.61     <none>        3000:30902/TCP               6h50m
+kubernetes                                  ClusterIP   10.233.0.1      <none>        443/TCP                      7h48m
+prometheus-operated                         ClusterIP   None            <none>        9090/TCP                     6h53m
+prometheus-stack-grafana                    ClusterIP   10.233.63.161   <none>        80/TCP                       6h53m
+prometheus-stack-kube-prom-alertmanager     ClusterIP   10.233.34.154   <none>        9093/TCP,8080/TCP            6h53m
+prometheus-stack-kube-prom-operator         ClusterIP   10.233.2.29     <none>        443/TCP                      6h53m
+prometheus-stack-kube-prom-prometheus       ClusterIP   10.233.51.106   <none>        9090/TCP,8080/TCP            6h53m
+prometheus-stack-kube-state-metrics         ClusterIP   10.233.42.87    <none>        8080/TCP                     6h53m
+prometheus-stack-prometheus-node-exporter   ClusterIP   10.233.47.126   <none>        9100/TCP                     6h53m
+```
+Проверим в браузере
+![]() grafama image
+
+[app - наш load balancer](http://51.250.34.133/) 
+
+[grafana](http://51.250.40.131:3000)  
+
+![app image]()  
+
+![yandex cloud resources]()
 
 </details>
+
   
 <details><summary>Установка и настройка CI/CD</summary>
 
