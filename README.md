@@ -29,31 +29,31 @@
 
 
 </details>
----
+  
 <details><summary>Создание Kubernetes кластера</summary>
 
 
 
 </details>
----
+  
 <details><summary>Создание тестового приложения</summary>
 
 
 
 </details>
----
+  
 <details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>
 
 
 
 </details>
----
+  
 <details><summary>Установка и настройка CI/CD</summary>
 
 
 
 </details>
----
+  
 ## Что необходимо для сдачи задания?
 
 1. Репозиторий с конфигурационными файлами Terraform и готовность продемонстрировать создание всех ресурсов с нуля.
