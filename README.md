@@ -387,7 +387,97 @@ prometheus-stack-prometheus-node-exporter   ClusterIP   10.233.47.126   <none>  
   
 <details><summary>Установка и настройка CI/CD</summary>
 
+Для CI/CD воспользуемся GitHub Actions
 
+[repository link]()
+
+[CICD манифест]()
+
+В настройках репозитория нашего приложения зададим необходимые secrets и variables
+
+![secrets image]()
+
+Наш манифест (расположен в /.github/workflows) - link cicd.yml
+
+```
+name: CICD
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/diploma
+  TAG: ${{ github.run_number }}
+  FILE_TAG: ./environments/value_tag
+  VARS_APP_REPO: ${{ vars.APP_REPO }}
+  REPO_DIR: app
+  
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '*'
+   
+jobs:
+
+  build:
+    outputs:
+      image_tag: ${{ env.TAG }}
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Get files
+      uses: actions/checkout@v3
+
+    - name: Set env TAG
+      id: step_tag
+      run: echo "TAG=$(echo ${GITHUB_REF:10})" >> $GITHUB_ENV
+      if: startsWith(github.ref, 'refs/tags/v')
+      
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+    
+    - name: Push the Docker image
+      run: |
+        docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+        docker push ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+
+  deploy: 
+    
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Update application
+      env:
+        tag: ${{ needs.build.outputs.image_tag }}
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          sudo su 
+          sudo apt install git -y
+          kubectl delete -f /app/kuber/deployment.yaml
+          kubectl delete -f /app/kuber/service.yaml
+          rm -rf /${{ env.REPO_DIR}}
+          git clone ${{ env.VARS_APP_REPO }} /${{ env.REPO_DIR}}
+          cd /${{ env.REPO_DIR}}
+          sed -i "s|{{image_tag}}|${{ env.tag }}|g" kuber/deployment.yaml
+          sudo kubectl apply -f kuber/deployment.yaml
+          sudo kubectl apply -f kuber/service.yaml
+          sudo kubectl get po,svc | grep diploma
+```
+Во время сборки docker image, build осуществляется на основе ранее созданного [Dockerfile](), а deploy организован с помощью ранее упомянутых [deployment.yml]() и [service.yml]() - в нашем k8s создаются объекты, на основе данных манифестов
+
+Сделаем небольшое изменение в нашем приложении и проверим
+```
+
+```
 
 </details>
   
