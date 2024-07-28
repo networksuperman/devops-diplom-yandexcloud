@@ -182,9 +182,73 @@ kube-system   nodelocaldns-m6ff2                                       1/1     R
 
   
 <details><summary>Создание тестового приложения</summary>
+На основе nginx, создадим docker image, который будет имитировать работу нашего приложения  
+Выберем DockerHub как регистри
 
+Repository link
 
+Dockerfile link
 
+nginx conf link
+
+![]()  image of docker registry
+
+Для того чтобы развернуть наше приложение в k8s кластере, подготовим deployment и service файлы
+```
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diploma
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: diploma
+  template:
+    metadata:
+      labels:
+        app: diploma
+    spec:
+      containers:
+        - name: diploma
+          image: networkdockering/diploma:{{image_tag}}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+```
+```
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: diploma-svc
+spec:
+  type: NodePort
+  selector:
+    app: diploma
+  ports:
+    - name: web
+      nodePort: 30903
+      port: 80
+      targetPort: 80
+```
+Для нашего приложения, в terraform, опишем network balancer
+```
+resource "yandex_lb_network_load_balancer" "nlb-my-k8s-app" {
+
+  name = "nlb-my-k8s-app"
+
+  listener {
+    name        = "app-listener"
+    port        = 80
+    target_port = 30903
+    external_address_spec {
+      ip_version = "ipv4"
+    }
+  }
+```
 </details>
   
 <details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>
