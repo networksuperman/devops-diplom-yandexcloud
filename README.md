@@ -57,7 +57,7 @@ external_ip_nodes = tolist([
 ])
 ```
 
-В kubespray/inventory/my-k8s-cluster мы получаем файл hosts.yml, который пригодится нам в дальнейшем дял установки кластера через kubespray  
+В kubespray/inventory/my-k8s-cluster мы получаем файл hosts.yml, который пригодится нам в дальнейшем для установки кластера через kubespray  
 ```
 ---
 all:
