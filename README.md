@@ -25,7 +25,7 @@
 ## Этапы выполнения:
 
 <details><summary>Создание облачной инфраструктуры</summary>  
-
+  
 Обновим Terraform до последней версии
 
 ```
@@ -39,6 +39,7 @@ on linux_amd64
 [bucket.tf](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/bucket/bucket.tf)  
 
 Далее создадим VPC так, чтобы подсети были разнесены по разным зонам   
+
 [networks.tf](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/terraform/networks.tf)  
 
 В результате работы terraform мы получаем master ноду и 3 worker  
@@ -97,7 +98,7 @@ all:
 </details>
   
 <details><summary>Создание Kubernetes кластера</summary>  
-
+  
 Теперь создадим k8s кластер, для этого воспользуемся kubespray  
 ```
 git clone https://github.com/kubernetes-sigs/kubespray // клонируем репозиторий
@@ -182,8 +183,8 @@ kube-system   nodelocaldns-m6ff2                                       1/1     R
 </details>
 
   
-<details><summary>Создание тестового приложения</summary>
- 
+<details><summary>Создание тестового приложения</summary>  
+   
 На основе nginx, создадим docker image, который будет имитировать работу нашего приложения  
 
 Выберем DockerHub как регистри  
@@ -255,8 +256,8 @@ resource "yandex_lb_network_load_balancer" "nlb-my-k8s-app" {
 </details>
 
   
-<details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>  
-
+<details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>    
+  
 Развернем мониторинг с помощью Helm  
 ```
 helm version
@@ -374,7 +375,8 @@ prometheus-stack-kube-prom-prometheus       ClusterIP   10.233.51.106   <none>  
 prometheus-stack-kube-state-metrics         ClusterIP   10.233.42.87    <none>        8080/TCP                     6h53m
 prometheus-stack-prometheus-node-exporter   ClusterIP   10.233.47.126   <none>        9100/TCP                     6h53m
 ```
-Проверим в браузере
+Проверим в браузере  
+
 ![grafana web](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/grafana-web-1.png)
 
 [app - наш load balancer](http://51.250.34.133/)   
@@ -388,8 +390,8 @@ prometheus-stack-prometheus-node-exporter   ClusterIP   10.233.47.126   <none>  
 </details>
 
   
-<details><summary>Установка и настройка CI/CD</summary>  
-
+<details><summary>Установка и настройка CI/CD</summary>    
+  
 Для CI/CD воспользуемся GitHub Actions  
 
 [repository app](https://github.com/networksuperman/app.git)  
