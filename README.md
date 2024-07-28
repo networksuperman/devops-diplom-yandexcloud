@@ -24,31 +24,31 @@
 ---
 ## Этапы выполнения:
 
-<details><summary>### Создание облачной инфраструктуры</summary>
+<details><summary>Создание облачной инфраструктуры</summary>
 
 
 
 </details>
 ---
-<details><summary>### Создание Kubernetes кластера</summary>
+<details><summary>Создание Kubernetes кластера</summary>
 
 
 
 </details>
 ---
-<details><summary>### Создание тестового приложения</summary>
+<details><summary>Создание тестового приложения</summary>
 
 
 
 </details>
 ---
-<details><summary>### Подготовка cистемы мониторинга и деплой приложения</summary>
+<details><summary>Подготовка cистемы мониторинга и деплой приложения</summary>
 
 
 
 </details>
 ---
-<details><summary>### Установка и настройка CI/CD</summary>
+<details><summary>Установка и настройка CI/CD</summary>
 
 
 
