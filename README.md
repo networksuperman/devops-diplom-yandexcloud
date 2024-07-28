@@ -474,10 +474,33 @@ jobs:
 ```
 Во время сборки docker image, build осуществляется на основе ранее созданного [Dockerfile](), а deploy организован с помощью ранее упомянутых [deployment.yml]() и [service.yml]() - в нашем k8s создаются объекты, на основе данных манифестов
 
-Сделаем небольшое изменение в нашем приложении и проверим
+Сделаем небольшое изменение в нашем приложении (изменим версию с 0.0.8 на 0.0.9) и проверим
 ```
+git add .
+ubuntu@vm:~/app$ git commit -m "final commit"
+[main 597c096] final commit
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ubuntu@vm:~/app$ git push -u origin
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 335 bytes | 335.00 KiB/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To github.com:networksuperman/app.git
+   8c564f6..597c096  main -> main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+```
+Проверим в браузере
 
-```
+![app-final]()
+
+Проверим GitHub Actions
+
+![cicd-final]()
+
+Как видим, все прошло успешно
 
 </details>
   
