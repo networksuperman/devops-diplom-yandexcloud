@@ -510,10 +510,15 @@ Branch 'main' set up to track remote branch 'main' from 'origin'.
   
 ## Что необходимо для сдачи задания?
 
-. Репозиторий с конфигурационными файлами Terraform и готовность продемонстрировать создание всех ресурсов с нуля.
-2. Пример pull request с комментариями созданными atlantis'ом или снимки экрана из Terraform Cloud или вашего CI-CD-terraform pipeline.
-3. Репозиторий с конфигурацией ansible, если был выбран способ создания Kubernetes кластера при помощи ansible.
-4. Репозиторий с Dockerfile тестового приложения и ссылка на собранный docker image.
-5. Репозиторий с конфигурацией Kubernetes кластера.
-6. Ссылка на тестовое приложение и веб интерфейс Grafana с данными доступа.
-7. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab)
+[Репозиторий с конфигурационными файлами Terraform и готовность продемонстрировать создание всех ресурсов с нуля](https://github.com/networksuperman/devops-diplom-yandexcloud/tree/main/terraform)  
+
+[Пример pull request с комментариями созданными atlantis'ом или снимки экрана из Terraform Cloud или вашего CI-CD-terraform pipeline](https://github.com/networksuperman/app/actions/runs/10132295746)  
+
+[Репозиторий с Dockerfile тестового приложения](https://github.com/networksuperman/app.git) и [ссылка на собранный docker image](https://hub.docker.com/repository/docker/networkdockering/diploma/general)  
+
+[Репозиторий с конфигурацией Kubernetes кластера](https://github.com/kubernetes-sigs/kubespray)  
+
+[Ссылка на тестовое приложение](http://51.250.34.133/) и [веб интерфейс Grafana с данными доступа](http://51.250.40.131:3000)
+
+логин и пароль указал в сопроводительном письме в ЛК Нетологии
+
