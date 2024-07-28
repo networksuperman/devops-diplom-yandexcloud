@@ -25,8 +25,35 @@
 ## Этапы выполнения:
 
 <details><summary>Создание облачной инфраструктуры</summary>
+Обновим Terraform до последней версии
+```
+terraform version
+Terraform v1.9.3
+on linux_amd64
+```
+С помощью terraform создадим сервисный аккаунт и bucket для backend'a Terraform (хранение tfstate файлов)  
+bucket.tf link  
+Далее создадим VPC так, чтобы подсети были разнесены по разным зонам 
+networks.tf link  
+В результате работы terraform мы получаем master ноду и 3 worker
+```
+terraform apply
+Apply complete! Resources: 16 added, 0 changed, 0 destroyed.
 
+Outputs:
 
+external_ip_control_plane = "51.250.11.205"
+external_ip_nodes = tolist([
+  "89.169.138.220",
+  "89.169.160.113",
+  "51.250.36.217",
+])
+```
+В kubespray/inventory/my-k8s-cluster мы получаем файл hosts.yml, который пригодится нам в дальнейшем дял установки кластера через kubespray
+```
+
+```
+```
 
 </details>
   
