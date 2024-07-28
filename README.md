@@ -402,7 +402,7 @@ prometheus-stack-prometheus-node-exporter   ClusterIP   10.233.47.126   <none>  
 
 ![secrets image](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/cicd-1.png)  
 
-Наш манифест (расположен в /.github/workflows) - link cicd.yml
+Наш CI/CD манифест (расположен в /.github/workflows) - [cicd.yml](https://github.com/networksuperman/app/blob/main/.github/workflows/cicd.yml)  
 ```
 name: CICD
 
