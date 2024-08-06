@@ -70,7 +70,9 @@ NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP 
 ingress-nginx-controller             LoadBalancer   10.233.37.254   51.250.32.236   80:30539/TCP,443:31787/TCP   3m33s
 ingress-nginx-controller-admission   ClusterIP      10.233.56.27    <none>          443/TCP                      10m
 ```
-![]()  
+![](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/ingress-main-1.png)  
+
+![](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/ingress-main-2.png)  
 
 Создадим простой Ingress
 ```
@@ -103,4 +105,7 @@ kubectl apply -f ingress.yaml
 ```
 Оба приложения теперь доступны по одному ip адресу 51.250.32.236, на 3000 и 80 портах
 
+![](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/ingress-main-3.png)  
+
+![](https://github.com/networksuperman/devops-diplom-yandexcloud/blob/main/images/ingress-main-4.png)  
 
