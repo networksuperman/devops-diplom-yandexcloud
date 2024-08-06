@@ -1,40 +1,33 @@
 # Доработки к диплому
 
 ## Установка Ingress 
-Сначала попробовал вот так
-```
-nano values.yaml
-
-controller:
-  service:
-    type: NodePort
-    loadBalancerIP: 51.250.47.143"
-    nodePorts:
-      http: 30080
-  config:
-    pid: "/tmp/nginx/ingress_nginx.pid"
-```
-
-```
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace -f ./values.yaml
-```
-После сделал по-другому
 ```
 helm upgrade --install ingress-nginx ingress-nginx \
 --repo https://kubernetes.github.io/ingress-nginx \
 --namespace ingress-nginx --create-namespace
 ```
-В некоторых случаях может понадобиться, грубо говоря [пропатчить](https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/installation-with-helm/)
+Возможно придется ["патчить"](https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/installation-with-helm/)  
 ```
 helm pull oci://ghcr.io/nginxinc/charts/nginx-ingress --untar --version 1.1.2 && \
 cd nginx-ingress && \
 kubectl apply -f crds/
 ```
+Выполняем
+```
+KUBE_EDITOR="nano" kubectl edit configmap -n kube-system kube-proxy
+```
+Пропишем
+```
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: "ipvs"
+ipvs:
+  strictARP: true
+```
 ```
 kubectl apply -f externalIP.yaml
 
-nano externalIP.yaml
+cat externalIP.yaml
 
 apiVersion: v1
 kind: Service
@@ -69,7 +62,45 @@ spec:
     app.kubernetes.io/name: ingress-nginx
   type: LoadBalancer
   externalIPs:
-    - 51.250.47.143
+    - 51.250.32.236
 ```
-                             
-                                                                  
+```
+ kubectl -n ingress-nginx get svc
+NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.233.37.254   51.250.32.236   80:30539/TCP,443:31787/TCP   3m33s
+ingress-nginx-controller-admission   ClusterIP      10.233.56.27    <none>          443/TCP                      10m
+```
+![]()  
+
+Создадим простой Ingress
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  rules:
+  - host: 
+    http:
+      paths:
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana-service
+            port:
+              number: 3000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: diploma-service
+            port:
+              number: 80
+```
+```
+kubectl apply -f ingress.yaml
+```
+Оба приложения теперь доступны по одному ip адресу 51.250.32.236, на 3000 и 80 портах
+
+
